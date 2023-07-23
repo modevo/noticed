@@ -14,6 +14,7 @@ module Noticed
         device_tokens.each do |device_token|
           connection_pool.with do |connection|
             apn = Apnotic::Notification.new(device_token)
+            apn.sound = sound if sound
             format_notification(apn)
 
             response = connection.push(apn)
@@ -158,6 +159,16 @@ module Noticed
           cert_path.size > 0
         else
           File.exist?(cert_path)
+        end
+      end
+
+      def sound
+        option = options[:sound]
+        case option
+        when Symbol
+          notification.send(option)
+        else
+          option
         end
       end
 
