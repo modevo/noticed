@@ -14,7 +14,6 @@ module Noticed
         device_tokens.each do |device_token|
           connection_pool.with do |connection|
             apn = Apnotic::Notification.new(device_token)
-            apn.sound = sound if sound
             format_notification(apn)
 
             response = connection.push(apn)
@@ -34,6 +33,9 @@ module Noticed
 
       def format_notification(apn)
         apn.topic = bundle_identifier
+
+        apn.sound = sound if sound
+        apn.badge = badge if badge
 
         if (method = options[:format])
           notification.send(method, apn)
@@ -164,6 +166,16 @@ module Noticed
 
       def sound
         option = options[:sound]
+        case option
+        when Symbol
+          notification.send(option)
+        else
+          option
+        end
+      end
+
+      def badge
+        option = options[:badge]
         case option
         when Symbol
           notification.send(option)
